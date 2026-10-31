@@ -3,31 +3,19 @@
    Content Security Policy forbids them), so everything is here. */
 
 :root {
-  color-scheme: light dark;
-  --bg: #F7F6FC; --surface: #FFFFFF; --surface-alt: #EEECF8; --border: #E2DFF0; --border-strong: #CBC7E0;
-  --text: #1C1A33; --text-muted: #67647F; --text-faint: #7D789B;
-  --accent: #4A66E8; --accent-hover: #3C56D4; --accent-pressed: #3047BA; --on-accent: #FFFFFF;
-  --accent-soft: #E6EBFE; --accent-soft-hover: #D4DDFC; --accent-text: #3045B8;
-  --violet-soft: #EDE7FD; --violet-text: #5A37B5; --pink-soft: #FCE6F1; --pink-text: #A3256A;
-  --success: #2F9A6B; --success-soft: #DFF3EA; --success-text: #1F6B49; --danger: #C9403A; --danger-soft: #FBE6E4;
-  --warn-soft: #FFF1D6; --warn-text: #7A4B00;
-  --shadow: 0 1px 2px rgba(28, 26, 51, 0.06), 0 6px 18px rgba(28, 26, 51, 0.06);
+  color-scheme: dark;
+  --bg: #130F20; --surface: #1B1630; --surface-alt: #272046; --border: #2E2750; --border-strong: #413A66;
+  --text: #F2EFFC; --text-muted: #ABA6C9; --text-faint: #9690B6;
+  --accent: #4C68EE; --accent-hover: #6179F4; --accent-pressed: #3C57D9; --on-accent: #FFFFFF;
+  --accent-soft: #222C62; --accent-soft-hover: #2C3A7C; --accent-text: #A9B9FF;
+  --violet-soft: #33235F; --violet-text: #C8B4FF; --pink-soft: #4A2044; --pink-text: #FFAED6;
+  --success: #4FC592; --success-soft: #1B3A31; --success-text: #9BE5C4; --danger: #F0766E; --danger-soft: #4A2226;
+  --warn-soft: #3F3010; --warn-text: #F3D18A;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 18px rgba(0, 0, 0, 0.3);
   --serif: "Young Serif", Georgia, "Times New Roman", serif;
   --sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --gutter: max(16px, env(safe-area-inset-left), env(safe-area-inset-right));
   --radius: 16px;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #130F20; --surface: #1B1630; --surface-alt: #272046; --border: #2E2750; --border-strong: #413A66;
-    --text: #F2EFFC; --text-muted: #ABA6C9; --text-faint: #9690B6;
-    --accent: #4C68EE; --accent-hover: #6179F4; --accent-pressed: #3C57D9; --on-accent: #FFFFFF;
-    --accent-soft: #222C62; --accent-soft-hover: #2C3A7C; --accent-text: #A9B9FF;
-    --violet-soft: #33235F; --violet-text: #C8B4FF; --pink-soft: #4A2044; --pink-text: #FFAED6;
-    --success: #4FC592; --success-soft: #1B3A31; --success-text: #9BE5C4; --danger: #F0766E; --danger-soft: #4A2226;
-    --warn-soft: #3F3010; --warn-text: #F3D18A;
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 18px rgba(0, 0, 0, 0.3);
-  }
 }
 
 * { box-sizing: border-box; }
