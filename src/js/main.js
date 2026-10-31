@@ -18,6 +18,7 @@ import { VideoRegionSource } from './screen/videoSource.js';
 import { RegionWatcher } from './screen/watcher.js';
 import { regionLabel } from './screen/region.js';
 import { preparePhoto } from './screen/photo.js';
+import { TesseractReader } from './screen/ocr.js';
 import { isPhoneMode, hasWebGpu, hasBrowserSpeech, canShareTabAudio } from './device.js';
 import { byId as $, h, clear } from './ui/dom.js';
 import { renderSections } from './ui/suggestions.js';
@@ -41,8 +42,9 @@ const photoRegion = Object.freeze({ kind: 'photo' });
 let session = null; let pipeline = null; let webSpeech = null; let regionSource = null;
 let micWanted = false;
 
+const ocr = new TesseractReader();
 const engine = new Engine({
-  options: { autoSuggest: settings.autoSuggest },
+  options: { autoSuggest: settings.autoSuggest }, textReader: ocr,
   suggester: createSuggester({ getKey: (p) => keys.get(p) }),
   capture: makeCapture({ video: () => regionSource, photo }),
   watcherFactory: (region, onChange, onError) => {
@@ -404,7 +406,7 @@ const welcome = createWelcome({
 const settingsDialog = createSettingsDialog({
   dialog: $('dlg-settings'), fields: $('settings-fields'), keys,
   getSettings: () => settings, update: (s) => applySettings(s),
-  env: { webGpu, browserSpeech: hasBrowserSpeech(), phone, onForgetKeys: () => { keys.forgetAll(); showNotice('Every saved key was deleted from this browser.', { source: 'keys' }); } },
+  env: { webGpu, browserSpeech: hasBrowserSpeech(), phone, ocr: ocr.isAvailable, onForgetKeys: () => { keys.forgetAll(); showNotice('Every saved key was deleted from this browser.', { source: 'keys' }); } },
 });
 $('btn-settings').addEventListener('click', () => settingsDialog.open());
 $('dlg-settings').addEventListener('close', () => renderAll());
@@ -423,4 +425,4 @@ renderSuggestions(true);
 if (!keys.has(settings.provider) && settings.provider !== 'Other') welcome.open();
 
 // For the smoke tests only: with ?test=1 in the address, a handle to the engine (it holds no keys).
-if (new URLSearchParams(location.search).get('test') === '1') globalThis.__cuelight = { engine, get settings() { return settings; }, phone, photo, speech };
+if (new URLSearchParams(location.search).get('test') === '1') globalThis.__cuelight = { engine, get settings() { return settings; }, phone, photo, speech, ocr };

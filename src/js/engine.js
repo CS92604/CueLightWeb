@@ -83,7 +83,7 @@ export class Engine {
    * @param {{stream:(request:object, signal:AbortSignal)=>AsyncIterable<string>}} o.suggester
    * @param {{capture:(region:any)=>Promise<{mediaType:string,data:string}|null>, grab?:(region:any)=>Promise<{rgba:Uint8ClampedArray,width:number,height:number}>, release?:(region:any)=>void}} o.capture
    * @param {(region:any, onChange:()=>void, onError:(m:string)=>void)=>({pending:boolean,start:()=>void,dispose:()=>void}|null)} [o.watcherFactory]
-   * @param {{isAvailable:boolean, read:(rgba:any,width:number,height:number,signal:AbortSignal)=>Promise<string>}} [o.textReader]
+   * @param {{isAvailable:boolean, read:(grabbed:object, signal:AbortSignal)=>Promise<string>}} [o.textReader]  reads the words in what capture.grab() returns
    * @param {()=>number} [o.now]  seconds; replaceable in tests
    */
   constructor({ options, suggester, capture, watcherFactory = null, textReader = null, now = () => performance.now() / 1000 }) {
@@ -445,8 +445,8 @@ export class Engine {
   /** The words in the watched region, read here; null if they can't be read, in which case a picture is sent instead. */
   async #readScreenText(region, signal) {
     try {
-      const { rgba, width, height } = await this.#capture.grab(region);
-      const text = (await this.#textReader.read(rgba, width, height, signal)).trim();
+      const grabbed = await this.#capture.grab(region);
+      const text = (await this.#textReader.read(grabbed, signal)).trim();
       if ([...text].filter((c) => /[\p{L}\p{N}]/u.test(c)).length >= 2) return text;
       this.#emit(EngineEventKind.Status, { text: 'No words could be read in the text area, so it is sent as a picture.' });
     } catch (err) {

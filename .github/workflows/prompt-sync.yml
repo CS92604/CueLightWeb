@@ -1,0 +1,27 @@
+name: Prompt sync
+
+# The prompts, the style wording and the model lists are copies of the desktop app's (cs92604/CueLight, src/Cuelight.Core).
+# This fails when they drift apart, so that whichever side changed gets copied to the other.
+on:
+  push:
+    branches: [Stable]
+  schedule:
+    - cron: '17 5 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: CS92604/CueLight
+          path: desktop
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/check-prompt-sync.mjs desktop

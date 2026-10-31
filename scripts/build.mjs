@@ -58,9 +58,9 @@ if (fs.existsSync(tessDir)) {
   const tess = pkgDir('tesseract.js');
   const core = pkgDir('tesseract.js-core');
   const data = pkgDir('@tesseract.js-data/eng');
-  copy(path.join(tess, 'dist', 'tesseract.min.js'), path.join(out, 'vendor', 'tesseract', 'tesseract.min.js'));
+  copy(path.join(tess, 'dist', 'tesseract.esm.min.js'), path.join(out, 'vendor', 'tesseract', 'tesseract.esm.min.js'));
   copy(path.join(tess, 'dist', 'worker.min.js'), path.join(out, 'vendor', 'tesseract', 'worker.min.js'));
-  for (const f of ['tesseract-core-simd-lstm.wasm.js', 'tesseract-core-lstm.wasm.js'])
+  for (const f of ['tesseract-core-relaxedsimd-lstm.wasm.js', 'tesseract-core-simd-lstm.wasm.js', 'tesseract-core-lstm.wasm.js'])
     copy(path.join(core, f), path.join(out, 'vendor', 'tesseract', 'core', f));
   copy(path.join(data, '4.0.0_best_int', 'eng.traineddata.gz'), path.join(out, 'vendor', 'tesseract', 'lang', 'eng.traineddata.gz'));
 }

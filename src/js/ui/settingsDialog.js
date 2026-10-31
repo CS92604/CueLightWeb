@@ -15,6 +15,11 @@ export const SPEECH_CAPTIONS = Object.freeze({
   [SpeechAccuracy.Accurate]: 'Accurate: the most accurate, slower, and a large download (roughly 250 MB the first time). Best on a computer with WebGPU.',
 });
 
+export const READING_CAPTIONS = Object.freeze({
+  [ScreenReading.Detailed]: 'Detailed: sends a picture of the area each time it changes, so the AI sees the layout, colours and who wrote what. Needs a model that reads pictures.',
+  [ScreenReading.Fast]: 'Fast: the words in the area are read in this browser and only that text is sent, so no picture leaves this device. It costs less, works with any model, and misreads some words; the AI can\'t see colours or who wrote what.',
+});
+
 /**
  * @param {object} o
  * @param {HTMLDialogElement} o.dialog
@@ -22,7 +27,7 @@ export const SPEECH_CAPTIONS = Object.freeze({
  * @param {import('../keys.js').KeyStore} o.keys
  * @param {()=>object} o.getSettings
  * @param {(s:object)=>void} o.update  called with the new settings after every change
- * @param {{webGpu:boolean, browserSpeech:boolean, phone:boolean, onForgetKeys:()=>void}} o.env
+ * @param {{webGpu:boolean, browserSpeech:boolean, phone:boolean, ocr:boolean, onForgetKeys:()=>void}} o.env
  */
 export function createSettingsDialog({ dialog, fields, keys, getSettings, update, env }) {
   function build() {
@@ -69,6 +74,18 @@ export function createSettingsDialog({ dialog, fields, keys, getSettings, update
     }
     const think = checkbox({ label: 'Think first', help: 'Let the AI think before it replies: better on hard questions, slower to start. Off is best for a live conversation.', checked: s.thinkFirst, onChange: (v) => change({ thinkFirst: v }) });
     fields.append(think);
+
+    // -- reading the text area (a computer: a phone only sends photos)
+    if (env.ocr && !env.phone) {
+      fields.append(h('h3', { class: 'section-title' }, 'Reading the text area'));
+      const readCap = h('p', { class: 'caption' }, READING_CAPTIONS[s.screenReading]);
+      fields.append(h('div', { class: 'field' },
+        segmented({ name: 'reading', label: 'Reading the text area', value: s.screenReading,
+          options: [{ value: ScreenReading.Detailed, label: 'Detailed', title: READING_CAPTIONS.Detailed }, { value: ScreenReading.Fast, label: 'Fast', title: READING_CAPTIONS.Fast }],
+          onChange: (v) => { change({ screenReading: v }); readCap.textContent = READING_CAPTIONS[v]; } }),
+        readCap,
+        h('p', { class: 'caption faint' }, 'A photo is always sent as a picture. Fast needs a one-time load of about 16 MB, from this site.')));
+    }
 
     // -- how replies sound
     fields.append(h('h3', { class: 'section-title' }, 'How replies sound'));

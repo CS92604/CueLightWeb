@@ -1,0 +1,67 @@
+name: Test and deploy
+
+# Every push and pull request is tested. A push to the Stable branch is also published to GitHub Pages.
+# One-time setup in the repository: Settings > Pages > Build and deployment > Source = GitHub Actions.
+# (The github-pages environment only lets its default branch deploy: if Stable is not the default branch, add it under
+# Settings > Environments > github-pages > Deployment branches and tags.)
+on:
+  push:
+    branches: [Stable]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PLAYWRIGHT_VERSION: '1.63.0'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Unit tests
+        run: npm test
+      - name: Build the site
+        run: npm run build
+      - name: Smoke test in Chromium (fake microphone, fake AI service)
+        run: |
+          npm install --no-save --no-package-lock "playwright@${PLAYWRIGHT_VERSION}"
+          npx playwright install --with-deps chromium
+          SMOKE_OUT="$PWD/smoke-shots" npm run smoke
+      - name: Keep the smoke test screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-screenshots
+          path: smoke-shots
+          if-no-files-found: ignore
+      - name: Package the site for GitHub Pages
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/Stable'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: test
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/Stable'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

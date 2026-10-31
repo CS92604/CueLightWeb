@@ -34,12 +34,11 @@ export class VideoRegionSource {
     return { mediaType, data };
   }
 
-  /** The region's pixels, for reading its words on this device. */
+  /** The region as a canvas, for reading its words on this device. Small text is enlarged first: it reads better. */
   async grab(region) {
     const crop = this.#check(region);
-    const canvas = drawScaled(this.video, crop, 2400);
-    const ctx = canvas.getContext('2d');
-    return { rgba: ctx.getImageData(0, 0, canvas.width, canvas.height).data, width: canvas.width, height: canvas.height, canvas };
+    const canvas = drawScaled(this.video, crop, 2400, crop.height < 300 ? 2 : 1);
+    return { width: canvas.width, height: canvas.height, canvas };
   }
 
   /** A still of the whole shared picture, for choosing the region on. */

@@ -199,7 +199,8 @@ await step('a photo with a camera orientation and GPS data is resized, turned up
   assert.equal(Math.max(size.width, size.height), 1568, JSON.stringify(size));
   assert.ok(size.height > size.width, `should be turned upright (portrait), got ${JSON.stringify(size)}`);
   const tail = sent.body.messages[1].content.at(-1).text;
-  assert.match(tail, /The written text in the attached region just changed|I asked for suggestions/);
+  // alone, the photo asks for TYPE; if the microphone's next sentence lands at the same moment the two are merged into one request
+  assert.match(tail, /The written text in the attached region just changed\. Give me what to TYPE|Both the spoken conversation and the written text just changed\. Give me what to SAY and what to TYPE/);
   assert.match(tail, /<changed>.*written.*<\/changed>/);
 });
 await step('after the reply the photo is gone from memory and cannot be resent', async () => {
@@ -211,12 +212,35 @@ await step('after the reply the photo is gone from memory and cannot be resent',
   assert.equal(ai.requests.filter((r) => r.body?.messages?.[1]?.content?.some?.((p) => p.type === 'image_url')).length, count);
   assert.equal(await page.locator('#btn-panic').isDisabled(), true); // nothing to read until a new photo is added
 });
-await step('a newer photo replaces the older one', async () => {
-  await page.evaluate(() => { window.__cuelight.engine.setPaused(true); });
-  await page.click('#chip-rec'); // paused: a photo is held until it can be used
-  await page.evaluate(() => { window.__cuelight.engine.setPaused(true); });
-  await page.setInputFiles('#photo-input', photoFile);
-  await page.waitForTimeout(100);
+await step('a newer photo replaces the older one: the older is sent at most once (when it was the newest) and never again after the newer arrives', async () => {
+  const make = async (w, h, label) => {
+    const b64 = await page.evaluate(async ([w, h, label]) => {
+      const c = document.createElement('canvas'); c.width = w; c.height = h;
+      const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, w, h); g.fillStyle = '#000'; g.font = '60px sans-serif'; g.fillText(label, 20, 100);
+      const blob = await new Promise((r) => c.toBlob(r, 'image/jpeg', 0.9));
+      return btoa(String.fromCharCode(...new Uint8Array(await blob.arrayBuffer())));
+    }, [w, h, label]);
+    const file = path.join(tmp, `${label}.jpg`); fs.writeFileSync(file, Buffer.from(b64, 'base64')); return file;
+  };
+  const first = await make(900, 600, 'older'); const second = await make(1000, 500, 'newer');
+  const before = ai.requests.length;
+  await page.setInputFiles('#photo-input', first);
+  await page.setInputFiles('#photo-input', second);
+  await page.waitForFunction(() => window.__cuelight.photo.has === false && window.__cuelight.engine.region === null, null, { timeout: 25000 });
+  await page.waitForTimeout(600);
+  const sizes = ai.requests.slice(before).flatMap((r) => (r.body?.messages?.[1]?.content ?? []).filter((p) => p.type === 'image_url').map((p) => imageSize(Buffer.from(p.image_url.url.split(',')[1], 'base64'))));
+  assert.ok(sizes.length >= 1, 'no photo was sent');
+  const isNewer = (s) => s.width === 1000 && s.height === 500;
+  assert.ok(isNewer(sizes.at(-1)), `the last photo sent should be the newest, got ${JSON.stringify(sizes)}`);
+  const firstNewer = sizes.findIndex(isNewer);
+  assert.ok(sizes.slice(firstNewer).every(isNewer), `an older photo was sent again after the newer one: ${JSON.stringify(sizes)}`);
+  assert.ok(sizes.length <= 3, `too many sends: ${JSON.stringify(sizes)}`);
+});
+await step('the main screen does not scroll sideways on a very narrow phone (320 px), with suggestions showing', async () => {
+  await page.setViewportSize({ width: 320, height: 640 });
+  assert.deepEqual(await page.evaluate(() => [document.documentElement.scrollWidth <= innerWidth, document.body.scrollWidth <= innerWidth]), [true, true]);
+  await page.screenshot({ path: path.join(outDir, 'phone-320.png') });
+  await page.setViewportSize({ width: 390, height: 844 });
 });
 
 await step('settings: the chosen options are kept for the next visit', async () => {
@@ -305,6 +329,26 @@ await step('the shared tab\'s sound is heard as "Them", and a change inside the 
   const size = imageSize(Buffer.from(url.split(',')[1], 'base64'));
   assert.ok(size && size.width < 1000, JSON.stringify(size));
   await desk.page.click('#btn-panic');
+});
+await step('Fast screen reading: the self-hosted Tesseract reads the words of a rendered chat message (nothing fetched from a CDN)', async () => {
+  const text = await desk.page.evaluate(async () => {
+    const c = document.createElement('canvas'); c.width = 700; c.height = 120;
+    const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, 700, 120); g.fillStyle = '#000'; g.font = '34px sans-serif';
+    g.fillText('Alice: are you free at three tomorrow?', 20, 70);
+    return window.__cuelight.ocr.read({ canvas: c });
+  });
+  assert.match(text.toLowerCase(), /alice/);
+  assert.match(text.toLowerCase(), /free/);
+  assert.match(text.toLowerCase(), /tomorrow/);
+});
+await step('with Fast reading chosen and nothing readable in the box, it says so and sends the picture instead', async () => {
+  if (!(await desk.page.evaluate(() => document.querySelector('video.sampler') !== null && window.__cuelight.engine.region?.kind === 'region'))) return 'skip: no watched box (see above)';
+  await desk.page.evaluate(() => { document.getElementById('btn-settings').click(); });
+  await desk.page.locator('#settings-fields .seg label', { hasText: 'Fast' }).first().click();
+  assert.equal(await desk.page.evaluate(() => window.__cuelight.settings.screenReading), 'Fast');
+  await desk.page.click('#dlg-settings >> text=Done');
+  await desk.page.click('#btn-panic');
+  await desk.page.waitForFunction(() => /No words could be read in the text area|sent as a picture/.test(document.getElementById('status-text').textContent) || document.querySelector('#sections .option'), null, { timeout: 30000 });
 });
 await step('no Content Security Policy violation happened on the desktop page', async () => {
   assert.deepEqual(await desk.page.evaluate(() => window.__csp), []);

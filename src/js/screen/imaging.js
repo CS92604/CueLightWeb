@@ -20,14 +20,15 @@ export async function encodeCanvas(canvas) {
   return { mediaType: blob.type, data: toBase64(new Uint8Array(await blob.arrayBuffer())), width: canvas.width, height: canvas.height };
 }
 
-/** Draw part of a source (video, bitmap or canvas) scaled so the long edge is at most max. */
-export function drawScaled(source, crop, max = 1568) {
-  const { width, height } = fitWithin(crop.width, crop.height, max);
+/** Draw part of a source (video, bitmap or canvas) scaled so the long edge is at most max (`enlarge` first makes it bigger). */
+export function drawScaled(source, crop, max = 1568, enlarge = 1) {
+  const { width, height } = fitWithin(Math.round(crop.width * enlarge), Math.round(crop.height * enlarge), max);
   const canvas = document.createElement('canvas');
   canvas.width = width; canvas.height = height;
   const ctx = canvas.getContext('2d', { alpha: false });
   ctx.fillStyle = '#fff';
   ctx.fillRect(0, 0, width, height);
+  ctx.imageSmoothingQuality = 'high';
   ctx.drawImage(source, crop.left, crop.top, crop.width, crop.height, 0, 0, width, height);
   return canvas;
 }
