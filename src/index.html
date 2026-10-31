@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; font-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' https: http://localhost:* http://127.0.0.1:*; worker-src 'self' blob:; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#F7F6FC" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#130F20" media="(prefers-color-scheme: dark)">
+<meta name="description" content="CueLight Web listens to a conversation and tells you what to say, a fuller answer, and what to type, in words that sound human. Bring your own AI key; nothing goes to the author.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>CueLight Web</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/app.css">
+<script type="module" src="js/main.js"></script>
+</head>
+<body>
+<noscript><p class="noscript">CueLight Web needs JavaScript. It is plain JavaScript from this site only: no frameworks, no outside scripts.</p></noscript>
+
+<div id="app" class="app">
+  <header class="top">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M12 3.5a8.5 8.5 0 1 0 0 17a8.5 8.5 0 1 0 0-17z M12 9.9a2.1 2.1 0 1 0 0 4.2a2.1 2.1 0 1 0 0-4.2z"/></svg>
+      <h1 class="wordmark">CueLight</h1>
+      <span class="webtag" title="The web version of the CueLight desktop app">Web</span>
+    </div>
+    <div class="top-actions">
+      <button id="btn-install" class="icon-btn" type="button" hidden title="Install CueLight on this device so it opens like an app" aria-label="Install CueLight">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 3v12 M7 10l5 5 5-5 M5 21h14"/></svg>
+      </button>
+      <button id="btn-settings" class="icon-btn" type="button" title="Settings. Change how replies sound, which AI provider and model is used, privacy options and speech recognition." aria-label="Settings">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 21v-7 M4 10V3 M12 21v-9 M12 8V3 M20 21v-5 M20 12V3 M1 14h6 M9 8h6 M17 16h6"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="main" id="main">
+    <div class="chips">
+      <button id="chip-rec" class="chip" type="button" aria-pressed="false" title="Recording. On: listens (to the shared tab or screen, or the microphone) and, when Type is on, watches the text area. Off: nothing is heard, watched or sent to the AI.">
+        <span class="dot" aria-hidden="true"></span><span>Recording <b id="rec-state">OFF</b></span>
+      </button>
+      <button id="chip-type" class="chip" type="button" aria-pressed="false" title="Type. On: also reads a text area you pick (a chat, email or document) or a photo you add, and suggests what to type there. Off: only listens to the conversation and suggests what to say.">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2 M17 3h2a2 2 0 0 1 2 2v2 M21 17v2a2 2 0 0 1-2 2h-2 M7 21H5a2 2 0 0 1-2-2v-2 M7 12h10"/></svg>
+        <span>Type <b id="type-state">OFF</b></span>
+      </button>
+      <span id="cost" class="cost" title="">$0.00</span>
+    </div>
+
+    <p id="status" class="status" role="status" aria-live="polite"><span class="dot" aria-hidden="true"></span><span id="status-text">Recording is off. Nothing is being heard, watched or sent.</span></p>
+
+    <div id="notice" class="notice" role="alert" hidden>
+      <p id="notice-text" class="notice-text"></p>
+      <div class="notice-actions">
+        <button id="notice-action" class="btn small" type="button" hidden></button>
+        <button id="notice-close" class="icon-btn small" type="button" title="Dismiss" aria-label="Dismiss this message">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M18 6 6 18 M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <section class="card conversation" aria-labelledby="h-conv">
+      <h2 class="eyebrow" id="h-conv">Conversation</h2>
+      <div id="turns" class="turns" aria-live="polite"></div>
+      <p id="empty-conv" class="empty">Nothing heard yet. Start listening below and the conversation shows up here.</p>
+      <div id="live" class="turn live" hidden><span class="who" id="live-who">Them</span><span class="said" id="live-text"></span></div>
+    </section>
+
+    <section class="card listen" id="card-listen" aria-labelledby="h-listen">
+      <h2 class="eyebrow" id="h-listen">Listening</h2>
+      <p id="listen-state" class="listen-state"></p>
+      <div class="row wrap">
+        <button id="btn-share" class="btn" type="button" title="Pick a browser tab or a screen to share. Its sound is what the page hears, and its picture is where you choose the text area to watch. Nothing is recorded or uploaded; the sound is turned into words in this browser.">Share a tab or screen</button>
+        <button id="btn-mic" class="btn" type="button" title="Listen through the microphone. On a phone, hold it near the speaker you want it to hear.">Use the microphone</button>
+        <button id="btn-stop" class="btn quiet" type="button" hidden title="Stop listening and release the microphone and the shared tab or screen.">Stop listening</button>
+      </div>
+      <p id="listen-help" class="help"></p>
+    </section>
+
+    <section class="card area" id="card-area" aria-labelledby="h-area" hidden>
+      <h2 class="eyebrow" id="h-area">Text area</h2>
+      <div class="area-row">
+        <span class="area-icon" aria-hidden="true"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M3 7V5a2 2 0 0 1 2-2h2 M17 3h2a2 2 0 0 1 2 2v2 M21 17v2a2 2 0 0 1-2 2h-2 M7 21H5a2 2 0 0 1-2-2v-2 M7 12h10"/></svg></span>
+        <div class="area-text"><b id="area-title">Text area to watch</b><span id="area-sub" class="faint">None chosen</span></div>
+        <button id="btn-area" class="btn small" type="button" title="Drag a box over the exact part of the shared picture to watch: a chat, an email or a document. The AI only ever sees what is inside the box.">Select area</button>
+        <button id="btn-area-clear" class="icon-btn" type="button" hidden title="Stop watching this area. Type stays on; pick a new area whenever you like." aria-label="Stop watching this area">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M18 6 6 18 M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="row wrap">
+        <button id="btn-photo" class="btn" type="button" title="Add a photo of the text you want a reply to: your phone offers the camera or your photos. It is resized here, its camera and location details are removed, it is sent with the next reply only, and then it is dropped from memory.">Add a photo</button>
+        <input id="photo-input" class="visually-hidden" type="file" accept="image/*" tabindex="-1" aria-label="Choose or take a photo">
+      </div>
+      <p id="area-help" class="help"></p>
+    </section>
+
+    <section class="suggestions" aria-labelledby="h-sug">
+      <div class="sec-head">
+        <h2 class="eyebrow" id="h-sug">Suggestions</h2>
+        <button id="btn-regen" class="link-btn" type="button" title="Regenerate: redo the current suggestions with a different take.">
+          <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8 M21 3v5h-5 M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16 M8 16H3v5"/></svg>
+          Regenerate
+        </button>
+      </div>
+      <div id="sections" class="sections" aria-live="polite"></div>
+      <p id="sug-empty" class="empty">Suggestions appear here: what to SAY, a fuller ANSWER when a question was asked, and what to TYPE.</p>
+    </section>
+  </main>
+
+  <footer class="dock">
+    <form id="direction" class="direction" autocomplete="off">
+      <input id="hint" class="hint" type="text" maxlength="400" placeholder="Different angle? e.g. “shorter”" aria-label="Direction for the AI" title="Optional direction for the AI, like “shorter” or “more formal”. Press Enter to get suggestions with it, or Regenerate to redo the current ones.">
+      <button id="btn-send" class="send" type="submit" aria-label="Get suggestions now" title="Get suggestions now">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 19V5 M5 12l7-7 7 7"/></svg>
+      </button>
+    </form>
+    <div class="dock-row">
+      <label class="switch" title="Auto-suggest. On: the AI suggests a reply by itself whenever someone speaks or the text area changes. Off: it only answers when you press Send or Panic.">
+        <input id="auto" type="checkbox" role="switch"><span class="track" aria-hidden="true"></span><span>Auto-suggest</span>
+      </label>
+      <button id="btn-panic" class="btn panic" type="button" title="Panic: right now, read the text area or photo and reply to it.">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>Panic
+      </button>
+      <button id="btn-clear" class="link-btn" type="button" title="Clear chat. Forgets the conversation so far, including what the AI has been shown, and clears the suggestions. Use it when a new call starts.">Clear chat</button>
+    </div>
+  </footer>
+</div>
+
+<!-- Settings -->
+<dialog id="dlg-settings" class="dialog" aria-labelledby="h-settings">
+  <form method="dialog" class="dialog-body" id="settings-body">
+    <h2 id="h-settings" class="title">Settings</h2>
+    <div id="settings-fields"></div>
+    <div class="dialog-foot">
+      <span class="faint">Changes are saved as you make them.</span>
+      <button class="btn primary" value="done">Done</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- First run -->
+<dialog id="dlg-welcome" class="dialog" aria-labelledby="h-welcome">
+  <form class="dialog-body" id="welcome-body" method="dialog">
+    <div class="welcome-mark" aria-hidden="true"><svg viewBox="0 0 24 24" width="40" height="40"><path d="M12 3.5a8.5 8.5 0 1 0 0 17a8.5 8.5 0 1 0 0-17z M12 9.9a2.1 2.1 0 1 0 0 4.2a2.1 2.1 0 1 0 0-4.2z"/></svg></div>
+    <h2 id="h-welcome" class="display">CueLight Web</h2>
+    <p class="lede">Hears a conversation, reads any text you point at, and tells you what to say or type, in words that sound like you.</p>
+    <div id="welcome-fields"></div>
+  </form>
+</dialog>
+
+<!-- Choosing the text area on a still of the shared screen -->
+<dialog id="dlg-picker" class="dialog picker" aria-labelledby="h-picker">
+  <div class="dialog-body">
+    <h2 id="h-picker" class="title">Select the text area</h2>
+    <p class="help">Drag a box over the chat, email or document to watch. The AI only ever sees what is inside the box.</p>
+    <div id="picker-stage" class="picker-stage"><canvas id="picker-canvas" aria-label="A still of the shared screen. Drag to draw a box."></canvas><div id="picker-box" class="picker-box" hidden></div></div>
+    <div class="dialog-foot">
+      <button id="picker-cancel" class="btn" type="button">Cancel</button>
+      <button id="picker-ok" class="btn primary" type="button" disabled>Watch this area</button>
+    </div>
+  </div>
+</dialog>
+</body>
+</html>

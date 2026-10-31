@@ -1,0 +1,18 @@
+import { createRequire } from 'node:module';
+import { serve } from '../scripts/serve.mjs';
+const { chromium } = createRequire(import.meta.url)(process.env.PLAYWRIGHT_PATH ?? 'playwright');
+const { server, port } = await serve('_site', 0);
+const browser = await chromium.launch();
+const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+const problems = [];
+page.on('console', (m) => { if (['error', 'warning'].includes(m.type())) problems.push(`console.${m.type()}: ${m.text()}`); });
+page.on('pageerror', (e) => problems.push(`pageerror: ${e.message}`));
+await page.addInitScript(() => { window.__csp = []; document.addEventListener('securitypolicyviolation', (e) => window.__csp.push(`${e.violatedDirective} ${e.blockedURI} ${e.sourceFile}:${e.lineNumber}`)); });
+await page.goto(`http://127.0.0.1:${port}/?mode=phone&test=1`);
+await page.waitForTimeout(800);
+console.log('csp', await page.evaluate(() => window.__csp));
+console.log('welcome open', await page.evaluate(() => document.getElementById('dlg-welcome').open));
+console.log('scrollW', await page.evaluate(() => [document.documentElement.scrollWidth, innerWidth]));
+console.log(problems);
+await page.screenshot({ path: process.argv[2] ?? 'smoke-quick.png' });
+await browser.close(); server.close();
