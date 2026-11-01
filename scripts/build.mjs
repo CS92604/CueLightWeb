@@ -90,7 +90,7 @@ const html = fs.readFileSync(path.join(out, 'index.html'), 'utf8');
 if (/<script(?![^>]*\ssrc=)[^>]*>[\s\S]*?<\/script>/i.test(html)) fail('index.html has an inline script');
 if (/\sstyle\s*=|<style[\s>]/i.test(html)) fail('index.html has inline style');
 if (/\son[a-z]+\s*=/i.test(html)) fail('index.html has an inline event handler');
-if (/(src|href)\s*=\s*["']https?:\/\/(?!github\.com|console\.|platform\.|aistudio\.|build\.nvidia)/i.test(html)) fail('index.html loads something from another site');
+if (/(src|href)\s*=\s*["']https?:\/\/(?!github\.com|cs92604\.github\.io\/CueLightWeb\/|console\.|platform\.|aistudio\.|build\.nvidia)/i.test(html)) fail('index.html loads something from another site');
 
 function size(dir) { let n = 0; for (const f of fs.readdirSync(dir, { withFileTypes: true })) n += f.isDirectory() ? size(path.join(dir, f.name)) : fs.statSync(path.join(dir, f.name)).size; return n; }
 log(`built _site (${(size(out) / 1e6).toFixed(1)} MB): transformers.js ${tfPkg.version}, onnxruntime-web ${ortPkg.version}`);
