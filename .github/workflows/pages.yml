@@ -48,7 +48,7 @@ jobs:
           if-no-files-found: ignore
       - name: Package the site for GitHub Pages
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: _site
 
