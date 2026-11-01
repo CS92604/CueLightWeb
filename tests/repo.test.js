@@ -139,7 +139,7 @@ test('the build vendors what the page imports, and the workflow tests and deploy
   for (const needle of ['transformers.min.js', 'ort-wasm-simd-threaded.asyncify.wasm', 'ort-wasm-simd-threaded.wasm', 'inter-latin-wght-normal.woff2', 'young-serif-latin-400-normal.woff2', '.nojekyll'])
     assert.ok(build.includes(needle), `build.mjs doesn't copy ${needle}`);
   const wf = read('.github', 'workflows', 'pages.yml');
-  for (const needle of ['npm ci', 'npm test', 'npm run build', 'actions/upload-pages-artifact', 'actions/deploy-pages', 'pages: write', 'id-token: write', 'refs/heads/Stable'])
+  for (const needle of ['npm ci', 'npm test', 'npm run build', 'actions/upload-pages-artifact', 'actions/deploy-pages', 'pages: write', 'id-token: write', 'refs/heads/main'])
     assert.ok(wf.includes(needle), `pages.yml is missing ${needle}`);
   const pkg = JSON.parse(read('package.json'));
   assert.equal(pkg.dependencies['@huggingface/transformers'], '4.3.2');

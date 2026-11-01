@@ -206,10 +206,9 @@ This is built for **GitHub Pages**, deployed by `.github/workflows/pages.yml` (`
 **The one manual step:** in the repository, go to **Settings > Pages > Build and deployment > Source** and choose
 **GitHub Actions**. Then re-run the workflow (or push again). The page appears at `https://cs92604.github.io/CueLightWeb/`.
 
-Because the workflow deploys the **`Stable`** branch, one more thing may be needed: GitHub only lets a repository's
-default branch deploy to the `github-pages` environment unless told otherwise. If the deploy job is refused with an
-"environment protection rules" message, either make `Stable` the default branch, or add it under **Settings >
-Environments > github-pages > Deployment branches and tags**.
+The workflow deploys the **`main`** branch, which should be the repository's default branch (Settings > Branches). GitHub only
+lets the default branch deploy to the `github-pages` environment unless told otherwise; if the deploy job is refused with an
+"environment protection rules" message, check the rule under **Settings > Environments > github-pages > Deployment branches and tags**.
 
 For a custom domain (recommended; see [the warning above](#privacy-and-your-keys)) add it under Settings > Pages and put a
 `CNAME` file in `src/`.

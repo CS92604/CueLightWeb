@@ -4,7 +4,7 @@ name: Prompt sync
 # This fails when they drift apart, so that whichever side changed gets copied to the other.
 on:
   push:
-    branches: [Stable]
+    branches: [main, Stable]
   schedule:
     - cron: '17 5 * * 1'
   workflow_dispatch:

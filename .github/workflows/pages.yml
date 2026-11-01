@@ -1,12 +1,12 @@
 name: Test and deploy
 
-# Every push and pull request is tested. A push to the Stable branch is also published to GitHub Pages.
+# Every push and pull request is tested. A push to the main branch is also published to GitHub Pages.
 # One-time setup in the repository: Settings > Pages > Build and deployment > Source = GitHub Actions.
-# (The github-pages environment only lets its default branch deploy: if Stable is not the default branch, add it under
+# (The github-pages environment only lets its default branch deploy: if another branch is not the default branch, add it under
 # Settings > Environments > github-pages > Deployment branches and tags.)
 on:
   push:
-    branches: [Stable]
+    branches: [main, Stable]
   pull_request:
   workflow_dispatch:
 
@@ -47,14 +47,14 @@ jobs:
           path: smoke-shots
           if-no-files-found: ignore
       - name: Package the site for GitHub Pages
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/Stable'
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         uses: actions/upload-pages-artifact@v3
         with:
           path: _site
 
   deploy:
     needs: test
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/Stable'
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       pages: write
