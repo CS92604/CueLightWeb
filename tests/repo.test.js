@@ -90,7 +90,7 @@ test('the page sets the Content Security Policy it promises, with no inline scri
   assert.equal(/<style[\s>]/i.test(html) || /\sstyle\s*=/i.test(html), false, 'inline style');
   assert.equal(/\son[a-z]+\s*=/i.test(html), false, 'an inline event handler');
   for (const m of html.matchAll(/(?:src|href)="([^"]+)"/g)) {
-    if (/^(https?:|#|mailto:)/.test(m[1])) { assert.match(m[1], /^#/, `index.html loads or links ${m[1]}`); continue; }
+    if (/^(https?:|#|mailto:)/.test(m[1])) { assert.match(m[1], /^(#|https:\/\/cs92604\.github\.io\/CueLightWeb\/$)/, `index.html loads or links ${m[1]}`); continue; }
     assert.ok(fs.existsSync(path.join(root, 'src', m[1])) || m[1].startsWith('js/') === false && false, `${m[1]} is referenced but missing`);
   }
 });
