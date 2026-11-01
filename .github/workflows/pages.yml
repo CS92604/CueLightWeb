@@ -41,7 +41,7 @@ jobs:
           SMOKE_OUT="$PWD/smoke-shots" npm run smoke
       - name: Keep the smoke test screenshots
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: smoke-screenshots
           path: smoke-shots
