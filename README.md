@@ -4,11 +4,15 @@
 > [Claude Code](https://claude.com/claude-code), Anthropic's AI coding tool. This is an independent project with no
 > affiliation with Claude or Anthropic.
 
-A web page that listens to a conversation and uses an AI to tell you what to **say**, a fuller **answer** when a
-question was asked, and what to **type**, in words that sound like a person. It is the browser version of the
-[CueLight desktop app for Windows](https://github.com/CS92604/CueLight), and it is built for the case the desktop app
-can't cover: **your phone**. Bring your own API key for **Claude, ChatGPT, Gemini, Grok or NVIDIA** (which has a free
-key), or for any other service that speaks the OpenAI chat API.
+**CueLight Web is made for your phone.** Open it on your phone, put the call on speaker (or hold the phone near the
+voice you want it to hear), and it listens, then tells you what to **say**, a fuller **answer** when a question was asked,
+and what to **type**, in words that sound like a person. A photo of a chat or an email gives you something to type back.
+Everything is laid out for a small screen, one thumb and a screen that stays on.
+
+It is the browser version of the [CueLight desktop app for Windows](https://github.com/CS92604/CueLight), built for the
+case the desktop app can't cover. A computer works too (you can share a tab or screen and pick a text area to watch), but
+the phone is the intended way to use it. Bring your own API key for **Claude, ChatGPT, Gemini, Grok or NVIDIA** (which has
+a free key), or for any other service that speaks the OpenAI chat API.
 
 [![Test and deploy](https://github.com/CS92604/CueLightWeb/actions/workflows/pages.yml/badge.svg)](https://github.com/CS92604/CueLightWeb/actions/workflows/pages.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -113,6 +117,27 @@ Honest limits:
 - **System audio isn't available to a web page** (other than the Windows whole-screen share above).
 
 ## Privacy and your keys
+
+**In plain words, about your API key.** There is no CueLight server and no account. I (the author) never see your key, your
+audio, your transcript or your photos, because nothing is ever sent to me. When you paste a key, this page keeps it **in
+your own browser** on your own phone or computer, and the only place it is ever sent is **the AI company you picked**
+(Anthropic, OpenAI, Google, xAI, NVIDIA, or the address you typed for "Other"), straight from your browser, to pay for
+your own requests. It is not sent anywhere else, not even to this site's host.
+
+What that means for you:
+
+- By default the key is held only for the current tab (`sessionStorage`) and **disappears when you close it**, so you paste
+  it again next time. Turn on **Remember my keys on this device** if you'd rather not, and it is kept in `localStorage`
+  on that device until you tap **Forget my keys**.
+- Anyone who can open your unlocked phone and this page, or who runs a script on this site's origin, could read a
+  remembered key. So **set a spending limit** on the key at your AI provider, use a key you can revoke, and revoke it if
+  you ever suspect it leaked. Don't use this on a shared or borrowed device with "Remember" on.
+- Your phone's microphone audio is turned into text **on your phone** by default, and only the text goes to your AI. The
+  one exception is the opt-in "browser speech recognition", which sends audio to Google or Apple, and is off until you
+  turn it on.
+- Photos are shrunk, stripped of camera and location data, sent once, and then dropped from memory.
+
+The details:
 
 - **Keys stay in this browser.** One per provider, in `localStorage` when **Remember my keys on this device** is on, and
   in `sessionStorage` (this tab only, gone when it closes) when it is off, which is the default. A key is only ever read to
