@@ -4,15 +4,18 @@
 > [Claude Code](https://claude.com/claude-code), Anthropic's AI coding tool. This is an independent project with no
 > affiliation with Claude or Anthropic.
 
-**CueLight Web is made for your phone.** Open it on your phone, put the call on speaker (or hold the phone near the
-voice you want it to hear), and it listens, then tells you what to **say**, a fuller **answer** when a question was asked,
-and what to **type**, in words that sound like a person. A photo of a chat or an email gives you something to type back.
-Everything is laid out for a small screen, one thumb and a screen that stays on.
+**CueLight Web is mainly for iPhone, iPad and Android.** Open it in your phone's browser, put the call on speaker (or hold
+the phone near the voice you want it to hear), and it listens, then tells you what to **say**, a fuller **answer** when a
+question was asked, and what to **type**, in words that sound like a person. A photo of a chat or an email gives you
+something to type back. Everything is laid out for a small screen, one thumb and a screen that stays on.
 
-It is the browser version of the [CueLight desktop app for Windows](https://github.com/CS92604/CueLight), built for the
-case the desktop app can't cover. A computer works too (you can share a tab or screen and pick a text area to watch), but
-the phone is the intended way to use it. Bring your own API key for **Claude, ChatGPT, Gemini, Grok or NVIDIA** (which has
-a free key), or for any other service that speaks the OpenAI chat API.
+**On a computer it may work too** (Chrome and Edge can share a tab or screen, and you can pick a text area to watch), but
+that is a bonus, not the main goal. For a Windows PC, use the real thing: the
+**[CueLight desktop app](https://github.com/CS92604/CueLight)**. It hears your speakers directly, reads any window's text
+area, and can hide itself from screen sharing, none of which a web page can do. CueLight Web is its phone-sized sibling.
+
+Bring your own API key for **Claude, ChatGPT, Gemini, Grok or NVIDIA** (which has a free key), or for any other service
+that speaks the OpenAI chat API.
 
 [![Test and deploy](https://github.com/CS92604/CueLightWeb/actions/workflows/pages.yml/badge.svg)](https://github.com/CS92604/CueLightWeb/actions/workflows/pages.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -75,7 +78,9 @@ Phones can't share a screen or a tab, so on a phone the page hides those buttons
   is **dropped from memory**: nothing old is kept or sent again. A model that can't read pictures (such as NVIDIA's
   Llama 3.3 70B) gets the same "can't read pictures" message as in the desktop app.
 
-### On a computer
+### On a computer (it may work, but the desktop app is better)
+
+This is a secondary mode. For Windows, the [CueLight desktop app](https://github.com/CS92604/CueLight) does all of this more reliably.
 
 Chrome and Edge can share a **tab with its sound**: choose the tab and tick "Share tab audio". Sharing a whole screen
 includes the computer's sound on **Windows only**. Firefox and Safari share the picture but **not audio**, so use the
